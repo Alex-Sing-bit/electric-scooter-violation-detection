@@ -349,3 +349,10 @@ logs/
 *.out
 *.synctex.gz
 *.toc
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+modules.xml
