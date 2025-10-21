@@ -21,7 +21,8 @@ class ObjectSegmenter:
             segmenter = pipeline(
                 "image-segmentation",
                 model=self.MODEL_NAME,
-                device=0 if torch.cuda.is_available() else -1
+                device=0 if torch.cuda.is_available() else -1,
+                use_fast=True
             )
             return segmenter
         except Exception as e:
