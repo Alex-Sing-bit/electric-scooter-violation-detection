@@ -25,7 +25,7 @@ class ObjectSegmenter:
             )
             return segmenter
         except Exception as e:
-            raise Exception(f"Ошибка загрузки модели сегментации {model_name}: {e}")
+            raise RuntimeError(f"Ошибка загрузки модели сегментации {model_name}: {e}")
 
     def _load_image(self, image_path: str) -> Image.Image:
         """Загружает и валидирует изображение"""
