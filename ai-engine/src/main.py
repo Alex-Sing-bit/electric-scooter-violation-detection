@@ -8,7 +8,7 @@ from utils.config_loader import load_config
 def get_primary_detection_statistics(detections_list):
     """Собирает статистику по обнаруженным объектам"""
     people_count = sum(1 for detection in detections_list if detection.class_name == 'person')
-    scooter_count = sum(1 for detection in detections_list if detection.class_name == 'scooter')
+    scooter_count = sum(1 for detection in detections_list if detection.class_name == 'electricscooter')
 
     return people_count, scooter_count
 
