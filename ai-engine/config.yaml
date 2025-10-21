@@ -1,6 +1,5 @@
 paths:
   detection_model: "models/detection/best.pt"
-  segmentation_model: ""
   pose_model: ""
 
 models:
