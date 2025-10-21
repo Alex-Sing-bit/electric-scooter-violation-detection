@@ -1,0 +1,6 @@
+models:
+  detection:
+    confidence_threshold: 0.6
+    iou_threshold: 0.7
+paths:
+  detection_model: models/detection/best.pt
