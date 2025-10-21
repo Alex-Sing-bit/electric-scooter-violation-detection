@@ -2,6 +2,7 @@ import os
 import cv2
 
 from detection.object_detector import ObjectDetector
+from segmantation.segmentor import ObjectSegmenter
 from utils.config_loader import load_config
 
 
@@ -11,7 +12,6 @@ def get_primary_detection_statistics(detections_list):
     scooter_count = sum(1 for detection in detections_list if detection.class_name == 'electricscooter')
 
     return people_count, scooter_count
-
 
 def process_image(image_path: str, config: dict):
     """Выполняет общий анализ изображения на нарушения"""
@@ -28,7 +28,12 @@ def process_image(image_path: str, config: dict):
     people_count, scooter_count = get_primary_detection_statistics(detections_list)
     print(f"Найдено объектов: {people_count} людей, {scooter_count} самокатов")
 
-    # TODO: 4. СЕГМЕНТАЦИЯ
+    segmenter = ObjectSegmenter()
+    segmented_results = segmenter.segment(image_path)
+
+    for segmentation in segmented_results:
+        if segmentation != 'unknown':
+            print(f'{segmentation} - {len(segmented_results[segmentation])} зон')
 
     # TODO: 5. АНАЛИЗ ПОЗ
 
