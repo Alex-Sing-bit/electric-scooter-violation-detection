@@ -4,6 +4,7 @@ import cv2
 from detection.object_detector import ObjectDetector
 from segmantation.segmentor import ObjectSegmenter
 from utils.config_loader import load_config
+from visualisation.visualizer import ResultVisualizer
 
 
 def get_primary_detection_statistics(detections_list):
@@ -29,11 +30,11 @@ def process_image(image_path: str, config: dict):
     print(f"Найдено объектов: {people_count} людей, {scooter_count} самокатов")
 
     segmenter = ObjectSegmenter()
-    segmented_results = segmenter.segment(image_path)
+    segmented_results, image = segmenter.segment(image_path)
+    print(f"Результат сегментации\n{segmented_results}")
 
-    for segmentation in segmented_results:
-        if segmentation != 'unknown':
-            print(f'{segmentation} - {len(segmented_results[segmentation])} зон')
+    visualizer = ResultVisualizer()
+    visualizer.visualize_segmentation(image, segmented_results)
 
     # TODO: 5. АНАЛИЗ ПОЗ
 

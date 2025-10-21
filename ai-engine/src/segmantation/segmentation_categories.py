@@ -7,7 +7,7 @@ class SegmentCategory:
     name: str
     description: str
     classes: Set[str]
-    color: str = None  # для визуализации
+    color: tuple[int, int, int] = None
 
 
 class SegmentConfig:
@@ -17,27 +17,27 @@ class SegmentConfig:
         'crosswalk': SegmentCategory(
             name="crosswalk",
             description="Пешеходный переход",
-            classes={'crosswalk'},
-            color="#0022FF"
+            classes={'crosswalk', 'lane marking - crosswalk'},
+            color=(0, 0, 255)
         ),
         'acceptable': SegmentCategory(
             name="acceptable",
             description="Приемлемо для нахождения самоката",
             classes={'sidewalk', 'bike lane', 'pedestrian area',
                      'parking', 'curb', 'curb cut'},
-            color="#00FF00"
+            color=(0, 255, 0)
         ),
         'unacceptable': SegmentCategory(
             name="unacceptable",
             description="Неприемлемо для нахождения самоката",
             classes={'terrain', 'rail track', 'grass', 'vegetation', 'water'},
-            color="#FF0000"
+            color=(255, 0, 0)
         ),
         'road': SegmentCategory(
             name="road",
             description="Проезжая часть",
             classes={'road', 'service lane'},
-            color="#FFA500"
+            color=(255, 165, 0)
         )
     }
 

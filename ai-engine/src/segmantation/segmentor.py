@@ -44,14 +44,14 @@ class ObjectSegmenter:
         Сегментирует изображение.
 
         Returns:
-            Результаты сегментации по целевым классам
+            Результаты сегментации по целевым классам и начальное изображение
         """
 
         image = self._load_image(image_path)
         results = self.model(image)
 
         categorized = {category_name: [] for category_name in self.config.CATEGORIES.keys()}
-        categorized['unknown'] = []  # для классов не попавших в категории
+        categorized['unknown'] = []
 
         for result in results:
             result_class = result['label'].lower()
@@ -62,7 +62,7 @@ class ObjectSegmenter:
             else:
                 categorized['unknown'].append(result)
 
-        return categorized
+        return categorized, image
 
     def get_category_info(self, category_name: str) -> SegmentCategory:
         """Возвращает информацию о категории"""
