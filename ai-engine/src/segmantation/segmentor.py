@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 from PIL import Image
 from transformers import pipeline
@@ -25,6 +27,17 @@ class ObjectSegmenter:
         except Exception as e:
             raise Exception(f"Ошибка загрузки модели сегментации {model_name}: {e}")
 
+    def _load_image(self, image_path: str) -> Image.Image:
+        """Загружает и валидирует изображение"""
+        path = Path(image_path)
+        if not path.exists():
+            raise FileNotFoundError(f"Изображение не найдено: {image_path}")
+
+        try:
+            return Image.open(path).convert('RGB')
+        except Exception as e:
+            raise ValueError(f"Ошибка загрузки изображения {image_path}: {e}")
+
     def segment(self, image_path: str):
         """
         Сегментирует изображение.
@@ -33,7 +46,7 @@ class ObjectSegmenter:
             Результаты сегментации по целевым классам
         """
 
-        image = Image.open(image_path).convert('RGB')
+        image = self._load_image(image_path)
         results = self.model(image)
 
         categorized = {category_name: [] for category_name in self.config.CATEGORIES.keys()}
