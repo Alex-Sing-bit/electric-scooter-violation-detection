@@ -31,9 +31,10 @@ class Detection:
 
 class ObjectDetector:
 
-    def __init__(self, model_path: str, confidence_threshold: float = 0.5):
+    def __init__(self, model_path: str, confidence_threshold: float = 0.5, iou_threshold: float = 0.5):
         self.model = YOLO(model_path)
         self.confidence_threshold = confidence_threshold
+        self.iou_threshold = iou_threshold
 
     def detect(self, image_path: str) -> Dict[str, Any]:
         """
@@ -46,7 +47,7 @@ class ObjectDetector:
                 "image": np.array | None        # Изображение с нарисованными bbox (если доступно)
             }
         """
-        results = self.model(image_path, conf=self.confidence_threshold)
+        results = self.model(image_path, conf=self.confidence_threshold, iou=self.iou_threshold)
 
         detections = []
         for result in results:

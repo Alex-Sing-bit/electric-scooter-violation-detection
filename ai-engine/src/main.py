@@ -18,7 +18,8 @@ def process_image(image_path: str, config: dict):
 
     detector = ObjectDetector(
         model_path=config['paths']['detection_model'],
-        confidence_threshold=config['models']['detection']['confidence_threshold']
+        confidence_threshold=config['models']['detection']['confidence_threshold'],
+        iou_threshold=config['models']['detection']['iou_threshold']
     )
 
     result = detector.detect(image_path)
