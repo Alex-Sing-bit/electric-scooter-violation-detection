@@ -16,3 +16,5 @@ AI-powered system for detecting violations with electric scooters using computer
   - `docs/` - Документация
   - `shared/` - Общие ресурсы
   - `docker-compose.yml` - Запуск всей системы
+
+[Дополнительный анализ и отчеты](https://github.com/Alex-Sing-bit/electric-scooter-detection-model-analysis)
