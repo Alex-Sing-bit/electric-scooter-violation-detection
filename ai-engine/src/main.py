@@ -1,5 +1,9 @@
 import os
+import time
+from typing import Any
+
 import cv2
+from numpy import ndarray, dtype
 
 from detection.object_detector import ObjectDetector
 from segmantation.segmentor import ObjectSegmenter
@@ -14,7 +18,7 @@ def get_primary_detection_statistics(detections_list):
 
     return people_count, scooter_count
 
-def process_image(image_path: str, config: dict):
+def process_image(image: ndarray[Any, dtype], config: dict):
     """Выполняет общий анализ изображения на нарушения"""
 
     detector = ObjectDetector(
@@ -23,14 +27,15 @@ def process_image(image_path: str, config: dict):
         iou_threshold=config['models']['detection']['iou_threshold']
     )
 
-    result = detector.detect(image_path)
+    result = detector.detect(image)
     detections_list = result["detections"]
 
     people_count, scooter_count = get_primary_detection_statistics(detections_list)
     print(f"Найдено объектов: {people_count} людей, {scooter_count} самокатов")
 
     segmenter = ObjectSegmenter()
-    segmented_results, image = segmenter.segment(image_path)
+    segmented_results, image = segmenter.segment(image)
+    image.show()
     print(f"Результат сегментации\n{segmented_results}")
 
     visualizer = ResultVisualizer()
@@ -49,7 +54,7 @@ def process_image(image_path: str, config: dict):
     }]
 
     # TODO: 9. ВИЗУАЛИЗАЦИЯ РЕЗУЛЬТАТОВ
-    output_image = cv2.imread(image_path)
+    output_image = None
 
     return output_image, violations
 
@@ -62,11 +67,13 @@ def run_image_analysis(input_image_path, output_image_path, config_path='config/
         print(f"Ошибка: файл {input_image_path} не найден!")
         return False
 
+    input_image = cv2.imread(input_image_path)
+
     print("Начало анализа")
 
     try:
         config = load_config(config_path)
-        output_image, violations = process_image(input_image_path, config)
+        output_image, violations = process_image(input_image, config)
 
         cv2.imwrite(output_image_path, output_image)
         #TODO: Сделать вывод для нарушений

@@ -1,7 +1,10 @@
 from pathlib import Path
+from typing import Any
 
+import cv2
 import torch
 from PIL import Image
+from numpy import ndarray, dtype
 from transformers import pipeline
 
 from segmantation.segmentation_categories import SegmentConfig, SegmentCategory
@@ -16,7 +19,6 @@ class ObjectSegmenter:
         self.target_classes = config_class.get_all_classes()
 
     def _load_model(self):
-        model_name = 'facebook/mask2former-swin-large-mapillary-vistas-semantic'
         try:
             segmenter = pipeline(
                 "image-segmentation",
@@ -26,20 +28,17 @@ class ObjectSegmenter:
             )
             return segmenter
         except Exception as e:
-            raise RuntimeError(f"Ошибка загрузки модели сегментации {model_name}: {e}")
+            raise RuntimeError(f"Ошибка загрузки модели сегментации {self.MODEL_NAME}: {e}")
 
-    def _load_image(self, image_path: str) -> Image.Image:
+    def _load_image(self, image: ndarray[Any, dtype]) -> Image.Image:
         """Загружает и валидирует изображение"""
-        path = Path(image_path)
-        if not path.exists():
-            raise FileNotFoundError(f"Изображение не найдено: {image_path}")
 
         try:
-            return Image.open(path).convert('RGB')
+            return Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         except Exception as e:
-            raise ValueError(f"Ошибка загрузки изображения {image_path}: {e}")
+            raise ValueError(f"Ошибка загрузки изображения {image}: {e}")
 
-    def segment(self, image_path: str):
+    def segment(self,  image: ndarray[Any, dtype]):
         """
         Сегментирует изображение.
 
@@ -47,7 +46,7 @@ class ObjectSegmenter:
             Результаты сегментации по целевым классам и начальное изображение
         """
 
-        image = self._load_image(image_path)
+        image = self._load_image(image)
         results = self.model(image)
 
         categorized = {category_name: [] for category_name in self.config.CATEGORIES.keys()}
