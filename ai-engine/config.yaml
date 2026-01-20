@@ -7,5 +7,6 @@ models:
     confidence_threshold: 0.6    # минимальная уверенность для детекции (0-1)
     iou_threshold: 0.7           # порог для подавления дубликатов (0-1)
 
+
 logging:
   level: "INFO"

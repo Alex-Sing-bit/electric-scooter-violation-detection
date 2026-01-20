@@ -11,9 +11,9 @@ from segmantation.segmentation_categories import SegmentConfig, SegmentCategory
 
 
 class ObjectSegmenter:
-    MODEL_NAME = 'facebook/mask2former-swin-large-mapillary-vistas-semantic'
 
-    def __init__(self, config_class=SegmentConfig):
+    def __init__(self, model_name: str, config_class=SegmentConfig):
+        self.model_name = model_name
         self.model = self._load_model()
         self.config = config_class
         self.target_classes = config_class.get_all_classes()
@@ -22,13 +22,13 @@ class ObjectSegmenter:
         try:
             segmenter = pipeline(
                 "image-segmentation",
-                model=self.MODEL_NAME,
+                model=self.model_name,
                 device=0 if torch.cuda.is_available() else -1,
                 use_fast=True
             )
             return segmenter
         except Exception as e:
-            raise RuntimeError(f"Ошибка загрузки модели сегментации {self.MODEL_NAME}: {e}")
+            raise RuntimeError(f"Ошибка загрузки модели сегментации {self.model_name}: {e}")
 
     def _load_image(self, image: ndarray[Any, dtype]) -> Image.Image:
         """Загружает и валидирует изображение"""
