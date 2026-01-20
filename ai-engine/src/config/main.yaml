@@ -1,6 +1,19 @@
 models:
   detection:
+    model_path: models/detection/best.pt
     confidence_threshold: 0.6
     iou_threshold: 0.7
-paths:
-  detection_model: models/detection/best.pt
+
+  pose_estimation:
+    model_path: models/pose_classification/yolo11m-pose.pt
+
+  pose_classification:
+    ensemble_paths:
+      [
+      models/pose_classification/pose_classifier.joblib,
+      models/pose_classification/pose_classifier_2.joblib
+      ]
+    ensemble_weights: [1, 1]
+
+  segmentation:
+    segmentation_model: "facebook/mask2former-swin-large-mapillary-vistas-semantic"
