@@ -1,15 +1,10 @@
-import os
-
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from ultralytics import YOLO
 
 from pose_classification.pose_analyzer import extract_features
 from pose_classification.pose_classifier import PoseClassifier
-from pose_classification.pose_extraction_utils import find_nearest_scooter
 from pose_classification.simple_ensemble import SimpleEnsemble
+from utils.bbox_utils import find_nearest_scooter
 
 
 def _make_classifiers(ensemble_classifiers):
@@ -61,13 +56,13 @@ class PosePredictor:
         # Детекция поз людей
         results = self.pose_model(image, conf=0.5)
 
-        if len(results[0].keypoints) == 0:
+        if results[0].keypoints.shape[0] == 0:
             print("Люди не обнаружены")
-            return None
+            return None, None, None
 
         all_features = []
-
         bboxes = []
+        nearest_scooters =  []
 
         for i, (keypoints, box) in enumerate(zip(results[0].keypoints.data, results[0].boxes)):
             bbox = box.xyxy[0].cpu().numpy()
@@ -76,6 +71,7 @@ class PosePredictor:
 
             # Находим ближайший самокат
             nearest_scooter = find_nearest_scooter(bbox, self.scooters)
+            nearest_scooters.append(nearest_scooter)
             scooter_bbox = nearest_scooter['bbox'] if nearest_scooter else None
 
             features, visible_points = extract_features(kp_array, bbox, scooter_bbox)
@@ -84,11 +80,11 @@ class PosePredictor:
             features['image_path'] = None
             all_features.append(features)
 
-        return all_features, bboxes
+        return all_features, bboxes, nearest_scooters
 
     def predict_image(self, image):
         """Предсказание позы на изображении"""
-        features_list, bboxes = self.extract_features_from_image(image)
+        features_list, bboxes, nearest_scooters = self.extract_features_from_image(image)
 
         if not features_list:
             return None
@@ -117,7 +113,8 @@ class PosePredictor:
                     'class': class_name,
                     'confidence': confidence,
                     'all_probabilities': dict(zip(self.label_encoder.classes_, probability)),
-                    'bbox': bboxes[i]
+                    'bbox': bboxes[i],
+                    'nearest_scooter': nearest_scooters[i]
                 })
 
                 print(f"Человек {i + 1}: {class_name} (уверенность: {confidence:.3f})")

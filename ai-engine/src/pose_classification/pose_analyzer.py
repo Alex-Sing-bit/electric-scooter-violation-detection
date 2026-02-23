@@ -1,8 +1,8 @@
 import numpy as np
 
-from pose_classification.geometry_utils import calculate_angle, calculate_distance, calculate_slope
-from pose_classification.pose_extraction_utils import is_point_visible, normalize_by_bbox, \
-    calculate_point_relative_to_scooter, get_bbox_center
+from pose_classification.pose_extraction_utils import calculate_point_relative_to_scooter
+from utils.bbox_utils import is_point_visible, normalize_by_bbox, get_bbox_center
+from utils.geometry_utils import calculate_angle, calculate_distance, calculate_slope
 
 
 def _calculate_human_height(keypoints):
