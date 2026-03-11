@@ -82,3 +82,9 @@ def normalize_by_bbox(value, bbox, is_x=True):
         return (value - bbox[0]) / (bbox[2] - bbox[0]) if (bbox[2] - bbox[0]) > 0 else 0
     else:
         return (value - bbox[1]) / (bbox[3] - bbox[1]) if (bbox[3] - bbox[1]) > 0 else 0
+
+def get_bbox_height(bbox):
+    return bbox[3] - bbox[1]
+
+def get_bbox_width(bbox):
+    return bbox[2] - bbox[0]
