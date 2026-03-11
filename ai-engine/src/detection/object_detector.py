@@ -68,3 +68,25 @@ class ObjectDetector:
             "detections": detections,
             "image": result.plot() if hasattr(result, 'plot') else None
         }
+
+    def track(self, image: ndarray[Any, dtype]) -> Dict[str, Any]:
+        results = self.model.track(image, conf=self.confidence_threshold, iou=self.iou_threshold,
+                                   persist=True, show=False, verbose=False)
+
+        detections = []
+        for result in results:
+            boxes = result.boxes
+            if boxes is not None:
+                for box in boxes:
+                    detection = Detection(
+                        bbox=box.xyxy[0].tolist(),
+                        confidence=box.conf.item(),
+                        class_name=result.names[int(box.cls)],
+                        class_id=int(box.cls)
+                    )
+                    detections.append(detection)
+
+        return {
+            "detections": detections,
+            "image": result.plot() if hasattr(result, 'plot') else None
+        }
