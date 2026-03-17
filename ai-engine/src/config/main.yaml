@@ -1,8 +1,8 @@
 models:
   detection:
     model_path: models/detection/best.pt
-    confidence_threshold: 0.6
-    iou_threshold: 0.7
+    confidence_threshold: 0.44
+    iou_threshold: 0.8
 
   pose_estimation:
     model_path: models/pose_classification/yolo11m-pose.pt
@@ -11,7 +11,7 @@ models:
     ensemble_paths:
       [
       models/pose_classification/pose_classifier.joblib,
-      models/pose_classification/pose_classifier_2.joblib
+      models/pose_classification/pose_classifier_B.joblib
       ]
     ensemble_weights: [1, 1]
 
