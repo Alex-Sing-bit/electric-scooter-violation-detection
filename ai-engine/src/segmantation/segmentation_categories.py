@@ -24,7 +24,7 @@ class SegmentConfig:
             name="acceptable",
             description="Приемлемо для нахождения самоката",
             classes={'sidewalk', 'bike lane', 'pedestrian area',
-                     'parking', 'curb', 'curb cut'},
+                     'parking', 'curb', 'curb cut', 'building'},
             color=(0, 255, 0)
         ),
         'unacceptable': SegmentCategory(
