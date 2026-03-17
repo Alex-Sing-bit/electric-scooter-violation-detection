@@ -24,9 +24,8 @@ class SimpleEnsemble:
                     X_subset[col] = 0
 
             X_subset = X_subset[classifier.feature_columns]
-            X_scaled = classifier.scaler.transform(X_subset)
 
-            proba = classifier.model.predict_proba(X_scaled)
+            proba = classifier.model.predict_proba(X_subset)
             probas.append(proba * weight)
 
         # Взвешенное усреднение
