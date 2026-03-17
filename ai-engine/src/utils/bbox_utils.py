@@ -88,3 +88,10 @@ def get_bbox_height(bbox):
 
 def get_bbox_width(bbox):
     return bbox[2] - bbox[0]
+
+def join_bboxes(bbox1, bbox2):
+    x1 = min(bbox1[0], bbox2[0])
+    y1 = min(bbox1[1], bbox2[1])
+    x2 = max(bbox1[2], bbox2[2])
+    y2 = max(bbox1[3], bbox2[3])
+    return [x1, y1, x2, y2]
