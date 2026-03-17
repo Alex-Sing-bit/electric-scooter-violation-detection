@@ -16,16 +16,14 @@ def _make_classifiers(ensemble_classifiers):
 
 
 class PosePredictor:
-    def __init__(self, scooters, pose_model_path='../models/pose_classification/yolo11m-pose.pt',
+    def __init__(self, scooters, pose_model_path='../app/models/pose_classification/yolo11m-pose.pt',
                  use_ensemble=False, ensemble_classifiers=None, ensemble_weights=None):
         if use_ensemble:
-            # Используем ансамбль
             self.classifiers = _make_classifiers(ensemble_classifiers)
             for classifier in self.classifiers:
                 if not classifier.load_model():
                     raise Exception(f"Не удалось загрузить модель для ансамбля!")
 
-            # Создаем ансамбль
             self.ensemble = SimpleEnsemble(
                 classifiers=self.classifiers,
                 weights=ensemble_weights
@@ -33,14 +31,12 @@ class PosePredictor:
             self.label_encoder = self.classifiers[0].label_encoder
             self.is_ensemble = True
 
-            # Собираем все фичи из всех моделей
             self.all_feature_columns = set()
             for clf in self.classifiers:
                 self.all_feature_columns.update(clf.feature_columns)
             self.all_feature_columns = list(self.all_feature_columns)
 
         else:
-            # Используем одиночную модель
             self.classifier = PoseClassifier(ensemble_classifiers[0])
             if not self.classifier.load_model():
                 raise Exception("Сначала обучите классификатор!")
@@ -53,11 +49,9 @@ class PosePredictor:
 
     def extract_features_from_image(self, image):
         """Извлечение признаков из изображения"""
-        # Детекция поз людей
-        results = self.pose_model(image, conf=0.5)
+        results = self.pose_model(image, conf=0.5, verbose=False)
 
         if results[0].keypoints.shape[0] == 0:
-            print("Люди не обнаружены")
             return None, None, None
 
         all_features = []
@@ -69,15 +63,12 @@ class PosePredictor:
             bboxes.append(bbox)
             kp_array = keypoints.cpu().numpy()
 
-            # Находим ближайший самокат
             nearest_scooter = find_nearest_scooter(bbox, self.scooters)
             nearest_scooters.append(nearest_scooter)
             scooter_bbox = nearest_scooter['bbox'] if nearest_scooter else None
 
             features, visible_points = extract_features(kp_array, bbox, scooter_bbox)
 
-            # TODO: поменять или убрать
-            features['image_path'] = None
             all_features.append(features)
 
         return all_features, bboxes, nearest_scooters
@@ -92,8 +83,6 @@ class PosePredictor:
         predictions = []
 
         for i, features in enumerate(features_list):
-            # Подготовка признаков для модели
-            #TODO: if-else для ансамбля, удалить если надо
             feature_vector = self._prepare_feature_vector(features, self.is_ensemble)
 
             if feature_vector is not None:
@@ -114,7 +103,8 @@ class PosePredictor:
                     'confidence': confidence,
                     'all_probabilities': dict(zip(self.label_encoder.classes_, probability)),
                     'bbox': bboxes[i],
-                    'nearest_scooter': nearest_scooters[i]
+                    'nearest_scooter': nearest_scooters[i],
+                    'violations': []
                 })
 
                 print(f"Человек {i + 1}: {class_name} (уверенность: {confidence:.3f})")
@@ -125,26 +115,21 @@ class PosePredictor:
     def _prepare_feature_vector(self, features, is_ensemble: bool):
         """Подготовка вектора признаков для модели"""
         try:
-            # Создаем DataFrame с одной строкой
+
             feature_df = pd.DataFrame([features])
 
-            # Исключаем не-признаковые колонки
             exclude_cols = ['image_path']
             feature_df = feature_df.drop(columns=[col for col in exclude_cols if col in feature_df.columns],
                                          errors='ignore')
 
-            # Заполняем отсутствующие колонки нулями
             for col in self.all_feature_columns:
                 if col not in feature_df.columns:
                     feature_df[col] = 0.0
 
-            # Упорядочиваем колонки
-            feature_df = feature_df[self.all_feature_columns]
-
             if is_ensemble:
-                return feature_df
+                return feature_df[self.all_feature_columns]
 
-            return self.classifier.scaler.transform(feature_df)
+            return feature_df[self.classifier.feature_columns]
 
         except Exception as e:
             print(f"Ошибка при подготовке признаков: {e}")
