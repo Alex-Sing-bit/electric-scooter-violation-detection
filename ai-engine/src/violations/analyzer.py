@@ -50,7 +50,7 @@ class ViolationsAnalyser:
         height_diff = abs(h1 / h2)
         center_diff = abs(c1[1] - c2[1]) / h1
 
-        return 0.8 < height_diff < 1.2 and center_diff < 0.1
+        return 0.6 < height_diff < 1.7 and center_diff < 0.2
 
     def _check_surface_violations(self, p, pose, surface):
         if pose in self.SURFACE_VIOLATIONS and surface in self.SURFACE_VIOLATIONS[pose]:
@@ -59,5 +59,5 @@ class ViolationsAnalyser:
     def _process_scooters(self, scooters, used_scooters):
         for scooter in scooters:
             scooter_id = str(scooter['bbox'][0])
-            if scooter_id not in used_scooters and scooter['surface'] in {'road', 'unacceptable'}:
+            if scooter_id not in used_scooters and scooter['surface'] in {'road', 'unacceptable', 'crosswalk'}:
                 scooter['warning'] = ['in_the_wrong_place']
