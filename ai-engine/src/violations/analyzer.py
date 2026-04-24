@@ -40,17 +40,17 @@ class ViolationsAnalyser:
             used_scooters[scooter_id] = p['bbox']
             return
 
-        if self._is_same_person(p['bbox'], used_scooters[scooter_id]):
+        if self._is_close_person(p['bbox'], used_scooters[scooter_id]):
             p['violations'].append('two_person_violation')
 
-    def _is_same_person(self, bbox1, bbox2):
+    def _is_close_person(self, bbox1, bbox2):
         h1, h2 = get_bbox_height(bbox1), get_bbox_height(bbox2)
         c1, c2 = get_bbox_center(bbox1), get_bbox_center(bbox2)
 
         height_diff = abs(h1 / h2)
         center_diff = abs(c1[1] - c2[1]) / h1
 
-        return 0.6 < height_diff < 1.7 and center_diff < 0.2
+        return 0.6 < height_diff < 1.7 and center_diff < 0.15
 
     def _check_surface_violations(self, p, pose, surface):
         if pose in self.SURFACE_VIOLATIONS and surface in self.SURFACE_VIOLATIONS[pose]:
