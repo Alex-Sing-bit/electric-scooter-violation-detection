@@ -24,40 +24,62 @@ def find_nearest_scooter(person_bbox, scooters):
     if not scooters:
         return None
 
-    person_center = get_bbox_center(person_bbox)
-    min_distance = float('inf')
+    max_intersect = 0
     nearest_scooter = None
 
     for scooter in scooters:
-        scooter_center = get_bbox_center(scooter['bbox'])
-        distance = calculate_distance(person_center, scooter_center)
+       lower_on = (person_bbox[3] - scooter['bbox'][3]) / get_bbox_height(person_bbox)
 
-        if distance < min_distance:
-            min_distance = distance
-            nearest_scooter = scooter
+       if lower_on > -0.4:
+            _, intersect_percent = is_intersect(person_bbox, scooter['bbox'])
+            if intersect_percent > max_intersect:
+                max_intersect = intersect_percent
+                nearest_scooter = scooter
 
-    # Проверяем, достаточно ли близко самокат к человеку
-    if is_intersect(nearest_scooter['bbox'], person_bbox):
+    if max_intersect > 30:
         return nearest_scooter
     else:
         return None
 
 def is_intersect(box1, box2):
     """
-    Проверяет, пересекаются ли два прямоугольника.
-    """
-    # Проверяем перекрытие по X
-    x_overlap = not (box1[2] < box2[0] or box2[2] < box1[0])
+    Проверяет, пересекаются ли два прямоугольника и возвращает процент пересечения.
 
-    # Проверяем перекрытие по Y
+    Возвращает:
+        (bool, float): (пересекаются_ли, процент_пересечения_от_большего_прямоугольника)
+    """
+    x_overlap = not (box1[2] < box2[0] or box2[2] < box1[0])
     y_overlap = not (box1[3] < box2[1] or box2[3] < box1[1])
 
-    return x_overlap and y_overlap
+    if not (x_overlap and y_overlap):
+        return False, 0.0
+
+    x_left = max(box1[0], box2[0])
+    y_top = max(box1[1], box2[1])
+    x_right = min(box1[2], box2[2])
+    y_bottom = min(box1[3], box2[3])
+
+    area1 = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    area2 = (box2[2] - box2[0]) * (box2[3] - box2[1])
+
+    intersection_area = (x_left - x_right) * (y_top - y_bottom)
+    if area1 < area2:
+        overlap_percentage = (intersection_area / area1) * 100
+    else:
+        overlap_percentage = (intersection_area / area2) * 100
+
+    return True, round(overlap_percentage, 1)
+
+def is_lower(lower_box, upper_box):
+    centre_lower = lower_box[3]
+    centre_upper= upper_box[3]
+
+    lower_on = centre_upper - centre_lower
+    return lower_on > 0, lower_on
 
 def get_bbox_center(bbox):
     """Получение центра bounding box"""
     return [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2]
-
 
 def is_point_visible(point, confidence_threshold=0.5):
     """Проверка видимости точки с учетом confidence"""
@@ -66,11 +88,9 @@ def is_point_visible(point, confidence_threshold=0.5):
 
     if len(point) > 2:
         confidence = point[2]
-        # Проверка confidence если есть
         if confidence < confidence_threshold:
             return False
 
-    # Базовая проверка координат
     if point[0] < 2 or point[1] < 2:
         return False
 
