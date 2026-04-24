@@ -1,0 +1,111 @@
+services:
+  gateway:
+    image: nginx:alpine
+    container_name: scooter-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+      - minio
+    networks:
+      - scooter-network
+      
+  worker:
+    build: ./ai-engine
+    container_name: ai-engine
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/src
+    volumes:
+      - ./ai-engine:/app
+    depends_on:
+      - redis
+      - db
+    networks:
+      - scooter-network
+
+  app:
+    build: backend
+    container_name: scooter-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/scooter_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=mypass
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      - scooter-network
+
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: scooter-db
+    environment:
+      - POSTGRES_DB=scooter_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mypass
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/main/resources/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command: >
+      postgres 
+      -c password_encryption=scram-sha-256
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - scooter-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: scooter-redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - scooter-network
+
+  minio:
+    image: minio/minio
+    container_name: scooter-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    ports:
+      - "9001:9001"
+    volumes:
+      - ./minio_data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - scooter-network
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  scooter-network:
+    driver: bridge
