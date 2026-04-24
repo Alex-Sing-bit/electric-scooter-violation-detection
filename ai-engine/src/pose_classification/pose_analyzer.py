@@ -1,6 +1,5 @@
 import numpy as np
 
-from pose_classification.pose_extraction_utils import calculate_point_relative_to_scooter
 from utils.bbox_utils import is_point_visible, normalize_by_bbox, get_bbox_center
 from utils.geometry_utils import calculate_angle, calculate_distance, calculate_slope
 
@@ -127,7 +126,7 @@ def _analyze_points_relative_to_scooter(points, scooter_bbox):
     if scooter_bbox is not None and scooter_bbox[2] > 0:
         for point_name in point_names:
             if points[point_name] is not None:
-                rel_x, rel_y = calculate_point_relative_to_scooter(points[point_name], scooter_bbox)
+                rel_x, rel_y = _calculate_point_relative_to_scooter(points[point_name], scooter_bbox)
                 features[f'{point_name}_to_scooter_x'] = rel_x
                 features[f'{point_name}_to_scooter_y'] = rel_y
             else:
@@ -139,6 +138,25 @@ def _analyze_points_relative_to_scooter(points, scooter_bbox):
             features[f'{point_name}_to_scooter_y'] = np.nan
 
     return features
+
+def _calculate_point_relative_to_scooter(point, scooter_bbox):
+    """расчет относительного положения точки к самокату"""
+    if point is None or scooter_bbox is None:
+        return 0, 0
+
+    scooter_x1, scooter_y1, scooter_x2, scooter_y2 = scooter_bbox
+    point_x, point_y = point
+
+    scooter_width = scooter_x2 - scooter_x1
+    scooter_height = scooter_y2 - scooter_y1
+
+    if scooter_width <= 0 or scooter_height <= 0:
+        return 0, 0
+
+    rel_x = (point_x - scooter_x1) / scooter_width
+    rel_y = (point_y - scooter_y1) / scooter_height
+
+    return rel_x, rel_y
 
 
 def _analyze_joint_distances(points, human_height):
