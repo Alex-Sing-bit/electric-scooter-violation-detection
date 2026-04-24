@@ -17,7 +17,7 @@ def load_config(config_path: str) -> dict:
                 },
                 'pose_classification': {
                     'ensemble_paths': ['models/pose_classification/pose_classifier.joblib', 'models/pose_classification/pose_classifier_B.joblib'],
-                    'ensemble_weights': [1, 1]
+                    'ensemble_weights': [1, 0]
                     },
                 'segmentation': {
                     'segmentation_model': 'facebook/mask2former-swin-large-mapillary-vistas-semantic'
