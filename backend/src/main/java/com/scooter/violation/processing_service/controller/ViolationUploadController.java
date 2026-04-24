@@ -1,8 +1,8 @@
 package com.scooter.violation.processing_service.controller;
 
-import com.scooter.violation.processing_service.entity.Violation;
+import com.scooter.violation.processing_service.entity.AnalysisTask;
 import com.scooter.violation.processing_service.entity.ViolationStatus;
-import com.scooter.violation.processing_service.repository.ViolationRepository;
+import com.scooter.violation.processing_service.repository.AnalysisTaskRepository;
 import com.scooter.violation.processing_service.service.AnalysisService;
 import com.scooter.violation.processing_service.service.StorageService;
 import lombok.RequiredArgsConstructor;
@@ -18,25 +18,27 @@ import java.util.UUID;
 public class ViolationUploadController {
 
     private final StorageService storageService;
-    private final ViolationRepository violationRepository;
+    private final AnalysisTaskRepository analysisTaskRepository;
     private final AnalysisService analysisService;
 
     @Transactional
     @GetMapping("/presigned-url")
     public ResponseEntity<?> getPresignedUrl(@RequestParam String extension) throws Exception {
-        String fileName = UUID.randomUUID() + "." + extension;
+        AnalysisTask analysisTask = new AnalysisTask();
+        analysisTask.setStatus(ViolationStatus.PENDING);
+        analysisTask.setFilePath("pending/" + UUID.randomUUID());
+        AnalysisTask savedAnalysisTask = analysisTaskRepository.save(analysisTask);
+
+        String fileName = savedAnalysisTask.getId().toString() + "." + extension;
         String filePath = "originals/" + fileName;
 
-        Violation violation = new Violation();
-        violation.setFilePath(filePath);
-        violation.setStatus(ViolationStatus.PENDING);
-
-        Violation savedViolation = violationRepository.save(violation);
+        savedAnalysisTask.setFilePath(filePath);
+        analysisTaskRepository.save(savedAnalysisTask);
 
         String uploadUrl = storageService.generatePresignedUploadUrl(filePath);
 
         return ResponseEntity.ok(new UploadResponse(
-                savedViolation.getId(),
+                savedAnalysisTask.getId(),
                 uploadUrl,
                 filePath
         ));
