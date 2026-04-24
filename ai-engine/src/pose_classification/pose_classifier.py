@@ -21,12 +21,10 @@ class PoseClassifier:
         print(f"Загружено {len(df)} записей")
         print(f"Распределение классов:\n{df['label'].value_counts()}")
 
-        # Кодируем метки
         y = self.label_encoder.fit_transform(df['label'].values)
         print(
             f"Закодированные классы: {dict(zip(self.label_encoder.classes_, self.label_encoder.transform(self.label_encoder.classes_)))}")
 
-        # Выбираем признаки (исключаем не-признаковые колонки)
         exclude_cols = ['image_path', 'label']
         self.feature_columns = [
             col for col in df.columns
@@ -35,30 +33,20 @@ class PoseClassifier:
 
         X = df[self.feature_columns]
 
-        # Обработка пропущенных значений и некорректных данных
         X = self._clean_data(X)
 
         return X, y
 
     def _clean_data(self, X):
-        # TODO: МЕНЯЕМ, none не везде проблема
         """Очистка и подготовка данных"""
-        # Заполняем пропущенные значения
-        #X = X.fillna(0)
-
-        # Заменяем бесконечные значения
         X = X.replace([np.inf, -np.inf], 0)
 
-        # Проверяем и обрабатываем числовые колонки
         for col in X.columns:
             if X[col].dtype == 'object':
                 try:
                     X[col] = pd.to_numeric(X[col], errors='coerce')
                 except:
                     print(f"Не удалось преобразовать колонку {col} в числовой формат")
-
-            # Заполняем оставшиеся NaN после преобразования
-            # X[col] = X[col].fillna(0)
 
         return X
 
@@ -79,14 +67,12 @@ class PoseClassifier:
             ))
         ])
 
-        # 1. Оценка через LOOCV
         loo = LeaveOneOut()
 
         scores = cross_val_score(pipeline, X, y, cv=loo, n_jobs=-1)
         loocv_acc = scores.mean()
         print(f"Честный LOOCV Accuracy: {loocv_acc:.4f}")
 
-        # 2. Финальное обучение на всех данных для сохранения
         pipeline.fit(X, y)
 
         oob_acc = pipeline.named_steps['rf'].oob_score_

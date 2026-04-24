@@ -107,9 +107,6 @@ class PosePredictor:
                     'violations': []
                 })
 
-                print(f"Человек {i + 1}: {class_name} (уверенность: {confidence:.3f})")
-                print(probability)
-
         return predictions
 
     def _prepare_feature_vector(self, features, is_ensemble: bool):
