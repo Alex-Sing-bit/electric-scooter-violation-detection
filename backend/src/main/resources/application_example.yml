@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: Scooter Violation Monitor
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  datasource:
+    url: jdbc:postgresql://db:5432/scooter_db
+    # Use your username and password
+    username: postgres
+    password: mypass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+minio:
+  # Use your access-key and secret-key
+  endpoint: http://minio:9000
+  external-url: http://localhost
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: scooter-violations
