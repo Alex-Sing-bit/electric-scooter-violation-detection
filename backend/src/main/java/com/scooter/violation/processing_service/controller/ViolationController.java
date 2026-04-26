@@ -1,7 +1,6 @@
 package com.scooter.violation.processing_service.controller;
 
-import com.scooter.violation.processing_service.entity.Violation;
-import com.scooter.violation.processing_service.repository.ViolationRepository;
+import com.scooter.violation.processing_service.dto.ViolationDTO;
 import com.scooter.violation.processing_service.service.ViolationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,21 +20,33 @@ public class ViolationController {
 
     @Transactional
     @PostMapping("/violations")
-    public void addViolation(@RequestBody Violation violation) throws Exception {
-        violationService.create(violation);
+    public ResponseEntity<?> createViolation(@RequestBody ViolationDTO violationDto) {
+        violationService.create(violationDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @Transactional
-    @PostMapping("/violations/{violationId}")
-    public void addViolation(@PathVariable UUID violationId, @RequestBody Violation violation) throws Exception {
-        violationService.update(violation, violationId);
+    @PutMapping("/violations/{violationId}")
+    public ResponseEntity<?> updateViolation(@PathVariable UUID violationId, @RequestBody ViolationDTO violationDto) {
+        boolean updated = violationService.update(violationDto, violationId);
+        return updated 
+                ? new ResponseEntity<>(HttpStatus.OK) 
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @Transactional
+    @DeleteMapping("/violations/{violationId}")
+    public ResponseEntity<?> deleteViolation(@PathVariable UUID violationId) {
+        boolean deleted = violationService.delete(violationId);
+        return deleted 
+                ? new ResponseEntity<>(HttpStatus.OK) 
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @Transactional
     @GetMapping("/violations")
-    public ResponseEntity<List<Violation>> getViolations() throws Exception {
-        List<Violation> violations = violationService.readAll();
-
+    public ResponseEntity<List<ViolationDTO>> getAllViolations() {
+        List<ViolationDTO> violations = violationService.readAll();
         return violations != null && !violations.isEmpty()
                 ? new ResponseEntity<>(violations, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -43,11 +54,19 @@ public class ViolationController {
 
     @Transactional
     @GetMapping("/violations/{violationId}")
-    public ResponseEntity<Violation> getViolation(@PathVariable UUID violationId) throws Exception {
-        Violation violation = violationService.read(violationId);
-
+    public ResponseEntity<ViolationDTO> getViolationById(@PathVariable UUID violationId) {
+        ViolationDTO violation = violationService.read(violationId);
         return violation != null
                 ? new ResponseEntity<>(violation, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @Transactional
+    @GetMapping("/violations/type/{type}")
+    public ResponseEntity<List<ViolationDTO>> getViolationsByType(@PathVariable String type) {
+        List<ViolationDTO> violations = violationService.readByType(type);
+        return violations != null && !violations.isEmpty()
+                ? new ResponseEntity<>(violations, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
