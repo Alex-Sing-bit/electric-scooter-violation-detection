@@ -18,7 +18,6 @@ public class StorageService {
 
     private final MinioClient minioClient;
     private final String bucket;
-    private final RestTemplate restTemplate;
 
     @Autowired
     public StorageService(
@@ -27,7 +26,6 @@ public class StorageService {
             RestTemplate restTemplate) {
         this.minioClient = minioClient;
         this.bucket = bucket;
-        this.restTemplate = restTemplate;
     }
 
     public String generatePresignedUploadUrl(String fileName) throws Exception {

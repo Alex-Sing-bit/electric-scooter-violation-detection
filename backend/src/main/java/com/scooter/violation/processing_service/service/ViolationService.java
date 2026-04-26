@@ -15,11 +15,6 @@ import java.util.stream.Collectors;
 public class ViolationService {
     private final ViolationRepository violationRepository;
 
-    public void create(ViolationDTO dto) {
-        Violation entity = toEntity(dto);
-        violationRepository.save(entity);
-    }
-
     public List<ViolationDTO> readAll() {
         return violationRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
@@ -30,16 +25,6 @@ public class ViolationService {
 
     public ViolationDTO read(UUID id) {
         return violationRepository.findById(id).map(this::toDTO).orElse(null);
-    }
-
-    public boolean update(ViolationDTO dto, UUID id) {
-        if (violationRepository.existsById(id)) {
-            Violation entity = toEntity(dto);
-            entity.setId(id);
-            violationRepository.save(entity);
-            return true;
-        }
-        return false;
     }
 
     public boolean delete(UUID id) {
@@ -60,14 +45,5 @@ public class ViolationService {
         dto.setFrameNumber(entity.getFrameNumber());
         dto.setDuration(entity.getDuration());
         return dto;
-    }
-
-    private Violation toEntity(ViolationDTO dto) {
-        Violation entity = new Violation();
-        entity.setType(dto.getType());
-        entity.setTimestampInVideo(dto.getTimestampInVideo());
-        entity.setFrameNumber(dto.getFrameNumber());
-        entity.setDuration(dto.getDuration());
-        return entity;
     }
 }
