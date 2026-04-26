@@ -68,8 +68,6 @@ public class ViolationService {
         entity.setTimestampInVideo(dto.getTimestampInVideo());
         entity.setFrameNumber(dto.getFrameNumber());
         entity.setDuration(dto.getDuration());
-        // Note: Task/Frame associations are not fully handled by this simple mapper,
-        // this would require loading the entities from their respective repositories.
         return entity;
     }
 }

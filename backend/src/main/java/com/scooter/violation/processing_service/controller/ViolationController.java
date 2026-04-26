@@ -19,27 +19,11 @@ public class ViolationController {
     private final ViolationService violationService;
 
     @Transactional
-    @PostMapping("/violations")
-    public ResponseEntity<?> createViolation(@RequestBody ViolationDTO violationDto) {
-        violationService.create(violationDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @Transactional
-    @PutMapping("/violations/{violationId}")
-    public ResponseEntity<?> updateViolation(@PathVariable UUID violationId, @RequestBody ViolationDTO violationDto) {
-        boolean updated = violationService.update(violationDto, violationId);
-        return updated 
-                ? new ResponseEntity<>(HttpStatus.OK) 
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @Transactional
     @DeleteMapping("/violations/{violationId}")
     public ResponseEntity<?> deleteViolation(@PathVariable UUID violationId) {
         boolean deleted = violationService.delete(violationId);
-        return deleted 
-                ? new ResponseEntity<>(HttpStatus.OK) 
+        return deleted
+                ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -47,7 +31,7 @@ public class ViolationController {
     @GetMapping("/violations")
     public ResponseEntity<List<ViolationDTO>> getAllViolations() {
         List<ViolationDTO> violations = violationService.readAll();
-        return violations != null && !violations.isEmpty()
+        return violations != null
                 ? new ResponseEntity<>(violations, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -65,7 +49,7 @@ public class ViolationController {
     @GetMapping("/violations/type/{type}")
     public ResponseEntity<List<ViolationDTO>> getViolationsByType(@PathVariable String type) {
         List<ViolationDTO> violations = violationService.readByType(type);
-        return violations != null && !violations.isEmpty()
+        return violations != null
                 ? new ResponseEntity<>(violations, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
