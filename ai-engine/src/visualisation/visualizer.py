@@ -59,7 +59,9 @@ def print_violations(image, violations):
         2
     )
 
-    return bordered_image
+    image_rgb = cv2.cvtColor(bordered_image, cv2.COLOR_BGR2RGB)
+
+    return image_rgb
 
 
 class ResultVisualizer:
@@ -113,7 +115,7 @@ class ResultVisualizer:
         if image is None:
             return None
 
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
         if predictions is None:
             plt.figure(figsize=(12, 8))
@@ -156,6 +158,8 @@ class ResultVisualizer:
             cv2.putText(image_rgb, f"{class_name}", (image.shape[1] - 150, legend_y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
             legend_y += 25
+
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         '''plt.figure(figsize=(12, 8))
         plt.imshow(image_rgb)

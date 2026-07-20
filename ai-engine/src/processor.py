@@ -154,8 +154,8 @@ class ViolationProcessor:
                         output_filename = f"violation_{violation_id}_f{frame_id}.jpg"
 
                         visualizer = ResultVisualizer()
-                        annotated_frame = visualizer.visualize_predictions(frame, predictions)
-                        annotated_frame = print_violations(annotated_frame, found_violations)
+                        annotated_frame = print_violations(frame, found_violations)
+                        annotated_frame = visualizer.visualize_predictions(annotated_frame, predictions)
 
                         if hasattr(annotated_frame, 'close'):
                             annotated_frame.close()
